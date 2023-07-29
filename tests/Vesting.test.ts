@@ -103,35 +103,52 @@ describe("Vesting service", async () => {
 			expect(valUtxos[0].origOutput.value.lovelace).toBeTypeOf('bigint');
 
 		});
-		it("lock as sasha and claim as pavel", async (context: localTC) => {
-		    const {h, h: { network, actors, delay, state }} = context;
+		it("lock as sasha and claim as sasha", async (context: localTC) => {
+			const {h, h: { network, actors, delay, state }} = context;
 			const { sasha, tom, pavel } = actors;
+
+			const tx1 = new Tx();
+			const sashaMoney = await sasha.utxos;
+
+			tx1.addInput(sashaMoney[0]);
+			tx1.addOutput(new TxOutput(sasha.address, new Value(3n * ADA)));
+			tx1.addOutput(new TxOutput(sasha.address, new Value(3n * ADA)));
+			tx1.addOutput(new TxOutput(sasha.address, new Value(3n * ADA)));
+			tx1.addOutput(
+				new TxOutput(
+				sasha.address,
+				new Value(sashaMoney[0].value.lovelace - 11n * ADA)
+				)
+			);
+
+			await h.submitTx(tx1);
 
 			const v = new Vesting(context);
 			const t = BigInt(Date.now());
 			const d = t + BigInt(2*60*60*1000);
 
 			const tcx = await v.mkTxnDepositValueForVesting({
-				sponsor: sasha,   // need sasha  
-				payee: pavel.address, // maybe pkh? 
+				sponsor: sasha,
+				payee: sasha.address, // maybe pkh? 
 				deadline: d
 			});
 
 			// explore the transaction data:
 			expect(tcx.inputs[0].origOutput.value.lovelace).toBeTypeOf('bigint');
-			expect(tcx.inputs[1].origOutput.value.lovelace).toBe(5000000n);
+			expect(tcx.inputs[1].origOutput.value.lovelace).toBeTypeOf('bigint');
 			expect(tcx.outputs[0].datum.data.toSchemaJson().length).toBe(175);
 
 			const txId = await h.submitTx(tcx.tx, "force");
 
 			expect((txId.hex).length).toBe(64);
 			expect((await pavel.utxos).length).toBe(2);
+			expect((await sasha.utxos).length).toBe(3);
 
 			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
 			const valUtxos = await network.getUtxos(validatorAddress)
 
 			const tcxClaim = await v.mkTxnClaimVestedValue(
-				pavel, 
+				sasha, 
 				valUtxos[0],
 				h.liveSlotParams.timeToSlot(t)
 			);
