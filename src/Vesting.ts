@@ -90,6 +90,40 @@ export class Vesting extends StellarContract<VestingParams> {
 
 	    return tcx
     }
+    @txn
+    async mkTxnCancelVesting(
+	sponsor: WalletEmulator,
+	valUtxo: UTxO,
+	// how does it get access to the currentSlot? 
+	t0: bigint,
+        tcx: StellarTxnContext = new StellarTxnContext()
+    ): Promise<StellarTxnContext | never> {
+	    // How does it work?
+	    // It creates a Redeemer and serializes it:
+	   const r = new this.configuredContract.types.Redeemer.Cancel();
+	   const valRedeemer = r._toUplcData();
+
+	   // finds enough utxos:
+	   const collateralUtxo = (await sponsor.utxos)[0];
+	   const feeUtxo = (await sponsor.utxos)[1];
+
+	   // Calculates validity interval:
+	   //const t0 = this.networkParams.timeToSlot(Date.now());
+	   const t1 = t0 + 5000n
+
+	   //creates the transaction and adds its components:
+	   tcx.addInput(feeUtxo)
+	   	.addInput(valUtxo, valRedeemer)
+           	.addOutput(new TxOutput(sponsor.address, valUtxo.value))
+           	
+           	.attachScript(this.compiledContract)
+           	.addCollateral(collateralUtxo);
+	tcx.tx.addSigner(sponsor.address.pubKeyHash);
+	tcx.tx.validFrom(t0);
+	tcx.tx.validTo(t1);
+
+	    return tcx
+    }
     requirements() {
         return {
             "can deposit with gradual maturation": {
