@@ -91,8 +91,8 @@ describe("Vesting service", async () => {
 
 			const tcx = await v.mkTxnDepositValueForVesting({
 				sponsor: sasha, 
-				payee: pavel.address, //TODO: check in valUtxos
-				deadline: deadline
+				payee: pavel.address, 
+				deadline: deadline 
 			});
 
 			const txId = await h.submitTx(tcx.tx, "force");
@@ -101,6 +101,7 @@ describe("Vesting service", async () => {
 			const valUtxos = await network.getUtxos(validatorAddress)
 
 			expect(valUtxos[0].origOutput.value.lovelace).toBeTypeOf('bigint');
+			expect(valUtxos[0].origOutput.datum.data.list[2].value).toBeGreaterThan(1690703757667n);
 
 		});
 });
@@ -111,6 +112,7 @@ describe("Vesting service", async () => {
 
 			const v = new Vesting(context);
 			const t = BigInt(Date.now());
+			// const d = t + BigInt(2*60*60*1000);
 			const d = t + BigInt(2*60*60*1000);
 
 			const tcx = await v.mkTxnDepositValueForVesting({
@@ -169,6 +171,7 @@ describe("Vesting service", async () => {
 			const t = BigInt(Date.now());
 			const d = t + BigInt(2*60*60*1000);
 
+			expect(d).toBeGreaterThan(1690703243707n);
 			const tcx = await v.mkTxnDepositValueForVesting({
 				sponsor: sasha,   // need sasha  
 				payee: pavel.address, // maybe pkh? 
@@ -196,9 +199,9 @@ describe("Vesting service", async () => {
 
 			const txIdCancel = await h.submitTx(tcxCancel.tx, "force");
 
-			const tomMoney = await tom.utxos;
-			expect(tomMoney[0].value.lovelace).toBeTypeOf('bigint');
-			expect(tomMoney[1].value.lovelace).toBeTypeOf('bigint');
+			const sashaMoneyEnd = await sasha.utxos;
+			expect(sashaMoneyEnd[0].value.lovelace).toBeTypeOf('bigint');
+			expect(sashaMoneyEnd[1].value.lovelace).toBeTypeOf('bigint');
 
 		});
 	});
