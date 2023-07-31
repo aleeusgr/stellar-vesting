@@ -57,7 +57,7 @@ export class Vesting extends StellarContract<VestingParams> {
 	return tcx
     }
     @txn
-    async mkTxnClaimVestedValue(
+    async mkTxnCancelVesting(
 	sponsor: WalletEmulator,
 	valUtxo: UTxO,
 	// how does it get access to the currentSlot? 
@@ -66,7 +66,7 @@ export class Vesting extends StellarContract<VestingParams> {
     ): Promise<StellarTxnContext | never> {
 	    // How does it work?
 	    // It creates a Redeemer and serializes it:
-	   const r = new this.configuredContract.types.Redeemer.Claim();
+	   const r = new this.configuredContract.types.Redeemer.Cancel();
 	   const valRedeemer = r._toUplcData();
 
 	   // finds enough utxos:

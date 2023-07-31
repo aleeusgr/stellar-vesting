@@ -107,9 +107,30 @@ describe("Vesting service", async () => {
 		    const {h, h: { network, actors, delay, state }} = context;
 			const { sasha, tom, pavel } = actors;
 
+			// sasha wont be able to claim unless they have a utxo to pay fees
+			// this may go to BeforeEach 
+			const tx = new Tx();
+			const sashaMoneyPre = await sasha.utxos;
+
+			tx.addInput(sashaMoneyPre[0]);
+			tx.addOutput(new TxOutput(sasha.address, new Value(3n * ADA)));
+			tx.addOutput(new TxOutput(sasha.address, new Value(3n * ADA)));
+			tx.addOutput(
+			    new TxOutput(
+			        sasha.address,
+			        new Value(sashaMoneyPre[0].value.lovelace - 15n * ADA)
+			    )
+			);
+
+			await h.submitTx(tx);
+
 			const v = new Vesting(context);
+
 			const t = BigInt(Date.now());
 			const deadline = t + BigInt(2*60*60*1000);
+			expect(t).toBeGreaterThan(1690794443387n);
+			expect(deadline).toBeGreaterThan(1690794443387n);
+
 
 			const tcx = await v.mkTxnDepositValueForVesting({
 				sponsor: sasha,   
@@ -117,26 +138,28 @@ describe("Vesting service", async () => {
 				deadline: deadline
 			});
 
-			// explore the transaction data:
-			expect(tcx.inputs[0].origOutput.value.lovelace).toBeTypeOf('bigint');
-			expect(tcx.inputs[1].origOutput.value.lovelace).toBe(5000000n);
-			expect(tcx.outputs[0].datum.data.toSchemaJson().length).toBe(175);
-
 			const txId = await h.submitTx(tcx.tx, "force");
 
+			// explore the transaction data:
+			expect(tcx.inputs[0].origOutput.value.lovelace).toBeTypeOf('bigint');
+			expect(tcx.inputs[1].origOutput.value.lovelace).toBeTypeOf('bigint');
+			// can check deadline here:
+			expect(tcx.outputs[0].datum.data.toSchemaJson().length).toBe(175);
+			// 
 			expect((txId.hex).length).toBe(64);
-			expect((await pavel.utxos).length).toBe(2);
+			// I need to split utxos until it passes:
+			expect((await sasha.utxos).length).toBe(2);
 
 			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
 			const valUtxos = await network.getUtxos(validatorAddress)
 
-			const tcxClaim = await v.mkTxnClaimVestedValue(
-				pavel, 
+			const tcxCancel = await v.mkTxnCancelVesting(
+				sasha, 
 				valUtxos[0],
 				h.liveSlotParams.timeToSlot(t)
 			);
 
-			const txIdClaim = await h.submitTx(tcxClaim.tx, "force");
+			const txIdCancel = await h.submitTx(tcxCancel.tx, "force");
 
 			const tomMoney = await tom.utxos;
 			expect(tomMoney[0].value.lovelace).toBeTypeOf('bigint');
