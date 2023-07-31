@@ -61,34 +61,36 @@ export class Vesting extends StellarContract<VestingParams> {
 	sponsor: WalletEmulator,
 	valUtxo: UTxO,
 	// how does it get access to the currentSlot? 
-	t0: bigint,
+	// bigint for slot, I need to convert time to slot
+	// I should expect Date here
+	validF: Date,
         tcx: StellarTxnContext = new StellarTxnContext()
     ): Promise<StellarTxnContext | never> {
-	    // How does it work?
-	    // It creates a Redeemer and serializes it:
-	   const r = new this.configuredContract.types.Redeemer.Cancel();
-	   const valRedeemer = r._toUplcData();
+	 // How does it work?
+	 // It creates a Redeemer and serializes it:
+	const r = new this.configuredContract.types.Redeemer.Cancel();
+	const valRedeemer = r._toUplcData();
 
-	   // finds enough utxos:
-	   const collateralUtxo = (await sponsor.utxos)[0];
-	   const feeUtxo = (await sponsor.utxos)[1];
+	// finds enough utxos:
+	const collateralUtxo = (await sponsor.utxos)[0];
+	const feeUtxo = (await sponsor.utxos)[1];
 
-	   // Calculates validity interval:
-	   //const t0 = this.networkParams.timeToSlot(Date.now());
-	   const t1 = t0 + 5000n
+	// Calculates validity :
+	const validT = validF + 1000*60*60
 
-	   //creates the transaction and adds its components:
-	   tcx.addInput(feeUtxo)
-	   	.addInput(valUtxo, valRedeemer)
-           	.addOutput(new TxOutput(sponsor.address, valUtxo.value))
-           	
-           	.attachScript(this.compiledContract)
-           	.addCollateral(collateralUtxo);
+	// this is suspicious, but should not be. Am I looking in a wrong place?
+	// tcx.tx.validFrom(validF);
+	// tcx.tx.validTo(validT);
 	tcx.tx.addSigner(sponsor.address.pubKeyHash);
-	tcx.tx.validFrom(t0);
-	tcx.tx.validTo(t1);
+	//creates the transaction and adds its components:
+	tcx.addInput(feeUtxo)
+	   .addInput(valUtxo, valRedeemer)
+	   .addOutput(new TxOutput(sponsor.address, valUtxo.value))
 
-	    return tcx
+	   .attachScript(this.compiledContract)
+	   .addCollateral(collateralUtxo);
+
+	 return tcx
     }
     requirements() {
         return {

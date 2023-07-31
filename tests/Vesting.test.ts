@@ -126,11 +126,11 @@ describe("Vesting service", async () => {
 
 			const v = new Vesting(context);
 
-			const t = BigInt(Date.now());
-			const deadline = t + BigInt(2*60*60*1000);
+			const t = Date.now();
+			const deadline = BigInt(t + 2*60*60*1000);
+			
 			expect(t).toBeGreaterThan(1690794443387n);
 			expect(deadline).toBeGreaterThan(1690794443387n);
-
 
 			const tcx = await v.mkTxnDepositValueForVesting({
 				sponsor: sasha,   
@@ -156,14 +156,18 @@ describe("Vesting service", async () => {
 			const tcxCancel = await v.mkTxnCancelVesting(
 				sasha, 
 				valUtxos[0],
-				h.liveSlotParams.timeToSlot(t)
+				// I should try passing a Date object here:
+				// h.liveSlotParams.timeToSlot(t)
+				t
 			);
 
+			expect(t).toBeGreaterThan(1690795694367n);
+			//expect(h.liveSlotParams.timeToSlot(t)).toBeGreaterThan(1690795712n);
 			const txIdCancel = await h.submitTx(tcxCancel.tx, "force");
 
-			const tomMoney = await tom.utxos;
-			expect(tomMoney[0].value.lovelace).toBeTypeOf('bigint');
-			expect(tomMoney[1].value.lovelace).toBeTypeOf('bigint');
+			const sashaMoney = await sasha.utxos;
+			expect(sashaMoney[0].value.lovelace).toBeTypeOf('bigint');
+			expect(sashaMoney[1].value.lovelace).toBeTypeOf('bigint');
 
 		});
 	});
