@@ -103,18 +103,18 @@ describe("Vesting service", async () => {
 			expect(valUtxos[0].origOutput.value.lovelace).toBeTypeOf('bigint');
 
 		});
-		it("lock as sasha and claim as pavel", async (context: localTC) => {
+		it("cancel as sasha", async (context: localTC) => {
 		    const {h, h: { network, actors, delay, state }} = context;
 			const { sasha, tom, pavel } = actors;
 
 			const v = new Vesting(context);
 			const t = BigInt(Date.now());
-			const d = t + BigInt(2*60*60*1000);
+			const deadline = t + BigInt(2*60*60*1000);
 
 			const tcx = await v.mkTxnDepositValueForVesting({
-				sponsor: sasha,   // need sasha  
+				sponsor: sasha,   
 				payee: pavel.address, // maybe pkh? 
-				deadline: d
+				deadline: deadline
 			});
 
 			// explore the transaction data:
