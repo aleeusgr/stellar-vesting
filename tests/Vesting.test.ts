@@ -124,7 +124,7 @@ describe("Vesting service", async () => {
 
 			const v = new Vesting(context);
 			const t = BigInt(Date.now());
-			const deadline = t - BigInt(2*60*60*1000);
+			const deadline = t + BigInt(2*60*60*1000); // now + two hours
 
 			const tcx = await v.mkTxnDepositValueForVesting({
 				sponsor: sasha,   
@@ -140,8 +140,7 @@ describe("Vesting service", async () => {
 			expect(tcx.outputs[0].datum.data.list[2].value).toBe(deadline);
 
 			expect((txId.hex).length).toBe(64);
-			// If user has less then 2 utxos, 
-			expect((await sasha.utxos).length).toBeGreaterThan(1);
+			expect((await sasha.utxos).length).toBeGreaterThan(1); //mkTxnClaim uses 2 utxos
 
 			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
 			const valUtxos = await network.getUtxos(validatorAddress)
@@ -152,7 +151,7 @@ describe("Vesting service", async () => {
 
 			expect(validFrom).toBeTypeOf('object');
 			expect(validTo).toBeTypeOf('object');
-			expect(BigInt(validFrom)).toBeGreaterThan(deadline);
+			expect(BigInt(validFrom)).toBeLessThan(deadline);
 
 			const tcxClaim = await v.mkTxnClaimVestedValue(
 				sasha, 
