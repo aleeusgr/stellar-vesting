@@ -146,7 +146,7 @@ describe("Vesting service", async () => {
 			const valUtxos = await network.getUtxos(validatorAddress)
 
 			// I think it comes from here:
-			const validFrom = new Date(Number(t));
+			const validFrom = new Date(Number(t-500n));
 			const validTo = new Date (validFrom + (1000*60));
 
 			expect(validFrom).toBeTypeOf('object');
