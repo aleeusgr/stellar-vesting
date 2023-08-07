@@ -24,9 +24,9 @@ import { StellarTxnContext } from "../lib/StellarTxnContext";
 
 import {
     ADA,
+    currentSlot,
     StellarTestContext, 
     StellarCapoTestHelper,
-    HelperFunctions,
     addTestContext,
     mkContext,
 } from "../lib/StellarTestHelper"; //HeliosTestingContext
@@ -144,9 +144,12 @@ describe("Vesting service", async () => {
 
 			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
 			const valUtxos = await network.getUtxos(validatorAddress)
+			
+			// check currentSlot:
+			expect(currentSlot()).toBe();
 
 			// I think it comes from here:
-			const validFrom = new Date(Number(t-500n));
+			const validFrom = new Date(Number(t-500n)); //see lley154, vesting
 			const validTo = new Date (validFrom + (1000*60));
 
 			expect(validFrom).toBeTypeOf('object');
