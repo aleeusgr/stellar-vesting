@@ -24,7 +24,6 @@ import { StellarTxnContext } from "../lib/StellarTxnContext";
 
 import {
     ADA,
-    currentSlot,
     StellarTestContext, 
     StellarCapoTestHelper,
     addTestContext,
@@ -146,7 +145,7 @@ describe("Vesting service", async () => {
 			const valUtxos = await network.getUtxos(validatorAddress)
 			
 			// check currentSlot:
-			expect(currentSlot()).toBe();
+			expect(h.currentSlot()).toBeTypeOf('bigint');
 
 			// I think it comes from here:
 			const validFrom = new Date(Number(t-500n)); //see lley154, vesting
