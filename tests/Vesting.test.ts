@@ -102,6 +102,7 @@ describe("Vesting service", async () => {
 			expect(valUtxos[0].origOutput.value.lovelace).toBeTypeOf('bigint');
 
 		});
+			
 		it("lock as sasha and claim as pavel", async (context: localTC) => {
 			const {h, h: { network, actors, delay, state }} = context;
 			const { sasha, tom, pavel } = actors;
@@ -124,6 +125,7 @@ describe("Vesting service", async () => {
 			const v = new Vesting(context);
 			const t = BigInt(Date.now());
 			const deadline = t + BigInt(2*60*60*1000); // now + two hours
+			expect(h.timeToSlot(t)).toBe();
 
 			const tcx = await v.mkTxnDepositValueForVesting({
 				sponsor: sasha,   
@@ -146,6 +148,7 @@ describe("Vesting service", async () => {
 			
 			// check currentSlot:
 			expect(h.currentSlot()).toBeTypeOf('bigint');
+			expect(h.slotToTimestamp(h.currentSlot())).toBe();
 
 			// I think it comes from here:
 			const validFrom = new Date(Number(t-500n)); //see lley154, vesting
