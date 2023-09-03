@@ -106,7 +106,7 @@ describe("Vesting service", async () => {
 
 			const tcx = await v.mkTxnDepositValueForVesting({
 				sponsor: sasha, 
-				payee: pavel.address, //TODO: check in valUtxos
+				payee: pavel.address, 
 				deadline: deadline
 			});
 
@@ -118,11 +118,11 @@ describe("Vesting service", async () => {
 			expect(valUtxos[0].origOutput.value.lovelace).toBeTypeOf('bigint');
 
 		});
-		it("can lock and cancel", async (context: localTC) => {
+		it("sasha can lock and cancel", async (context: localTC) => {
 		    const {h, h: { network, actors, delay, state }} = context;
 			const { sasha, tom, pavel } = actors;
 
-			async function tryWithSlop(user: WalletEmulator ) {
+			async function splitUtxos(user: WalletEmulator ) {
 				const margin = 45n * ADA;
 				const firstUtxo = (await user.utxos)[0]
 				const secondUtxo = (await user.utxos)[1]
@@ -141,18 +141,21 @@ describe("Vesting service", async () => {
 					new Value(firstUtxo.value.lovelace - margin)
 				    )
 				);
-				// console.log("s2")
 				return h.submitTx(tx, "force");
             		}
 
-			const splitUtxo = await tryWithSlop(sasha);
+			const splitUtxo = await splitUtxos(sasha);
 
 			expect((await sasha.utxos).length).toBeGreaterThan(2);
 
 			const v = new Vesting(context);
 
 			// TODO: deadline calculation
-			const deadline = BigInt(Date.now() + 99999999999999999);
+			const tDepo = Date.now();
+			expect(tDepo).toBeGreaterThan(1693459155930);
+			const offset =                1655683199999;
+			const deadline = BigInt(tDepo + offset);
+			expect(deadline).toBeGreaterThan(3349143163476n);
 
 			const tcx = await v.mkTxnDepositValueForVesting({
 				sponsor: sasha,
@@ -160,44 +163,111 @@ describe("Vesting service", async () => {
 				deadline: BigInt(deadline)
 			});
 
-			// Datum has time: 
-			expect(JSON.parse(tcx.outputs[0].datum.data.toSchemaJson()).list[2].int).toBeTypeOf('number');
-
 			const txId = await h.submitTx(tcx.tx, "force");
 
+			// can access deadline as number in Datum:
+			expect(JSON.parse(tcx.outputs[0].datum.data.toSchemaJson()).list[2].int).toBeTypeOf('number');
 			expect((txId.hex).length).toBe(64);
 			expect((await sasha.utxos).length).toBeGreaterThan(0);
 
 			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
 			const valUtxos = await network.getUtxos(validatorAddress)
 
-
-			// why does not it work? 
-			// TODO: h.waitUntil, property: time. 
-			// Ok, I can try to randomly generate intervals for validFrom and validTo
-
-			const startOffset = 0n;
-			const endOffset = 1000n;
-			// const validFrom = h.slotToTimestamp(h.currentSlot() + startOffset);
-			// const validTo = h.slotToTimestamp(h.currentSlot() + endOffset);
 			const now = BigInt(Date.now())
-			const validFrom = h.liveSlotParams.timeToSlot(now) + startOffset;
-			const validTo = validFrom + endOffset;
+			const validFrom = h.liveSlotParams.timeToSlot(now);
 
 			expect(validFrom).toBeTypeOf('bigint');
 
+			// TODO: make more definitive case here:
+			// sasha spent one utxo in the fees, so the new utxo must be 
+			// amountVested + (inputUtxo.value - txFee)
 			expect((await sasha.utxos).length).toBe(4);
 
 			const tcxCancel = await v.mkTxnCancelVesting(
 				sasha, 
 				valUtxos[0],
-				validFrom,
-				validTo
+				validFrom
 			);
 
 			const txIdCancel = await h.submitTx(tcxCancel.tx, "force");
 
 			expect((await sasha.utxos).length).toBe(4);
+
+		});
+		it("sasha can lock pavel can claim", async (context: localTC) => {
+		    const {h, h: { network, actors, delay, state }} = context;
+			const { sasha, tom, pavel } = actors;
+
+			async function splitUtxos(user: WalletEmulator ) {
+				const margin = 45n * ADA;
+				const firstUtxo = (await user.utxos)[0]
+				const secondUtxo = (await user.utxos)[1]
+				const tx = new Tx();
+
+				tx.addInput(firstUtxo);
+				tx.addInput(secondUtxo);
+
+				tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
+				tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
+				tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
+				tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
+				tx.addOutput(
+				    new TxOutput(
+					user.address,
+					new Value(firstUtxo.value.lovelace - margin)
+				    )
+				);
+				return h.submitTx(tx, "force");
+            		}
+
+			const splitUtxo = await splitUtxos(sasha);
+
+			expect((await sasha.utxos).length).toBeGreaterThan(2);
+
+			const v = new Vesting(context);
+
+			// TODO: deadline calculation
+			const tDepo = Date.now();
+			expect(tDepo).toBeGreaterThan(1693459155930);
+			const offset =                0;
+			const deadline = BigInt(tDepo + offset);
+			// expect(deadline).toBeGreaterThan(1693459155930n);
+
+			const tcx = await v.mkTxnDepositValueForVesting({
+				sponsor: sasha,
+				payee: pavel.address, // maybe pkh? 
+				deadline: BigInt(deadline)
+			});
+
+			const txId = await h.submitTx(tcx.tx, "force");
+
+			// can access deadline as number in Datum:
+			expect(JSON.parse(tcx.outputs[0].datum.data.toSchemaJson()).list[2].int).toBeTypeOf('number');
+			expect((txId.hex).length).toBe(64);
+			expect((await sasha.utxos).length).toBeGreaterThan(0);
+
+			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
+			const valUtxos = await network.getUtxos(validatorAddress)
+
+			const now = BigInt(Date.now())
+			const validFrom = h.liveSlotParams.timeToSlot(now);
+
+			expect(validFrom).toBeTypeOf('bigint');
+
+			// TODO: make more definitive case here:
+			// sasha spent one utxo in the fees, so the new utxo must be 
+			// amountVested + (inputUtxo.value - txFee)
+			expect((await pavel.utxos).length).toBe(2);
+
+			const tcxCancel = await v.mkTxnClaimVesting(
+				pavel, 
+				valUtxos[0],
+				validFrom
+			);
+
+			const txIdCancel = await h.submitTx(tcxCancel.tx, "force");
+
+			expect((await pavel.utxos).length).toBe(2);
 
 		});
 	});
