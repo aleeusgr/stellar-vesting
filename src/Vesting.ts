@@ -37,6 +37,7 @@ export class Vesting extends StellarContract<VestingParams> {
     }
     @txn
     async mkTxnDepositValueForVesting(
+	    // deadline -> [(deadlineA, 0.5),(deadlineB,0.5)]
         { sponsor, payee, deadline }: VestingParams,
         tcx: StellarTxnContext = new StellarTxnContext()
     ): Promise<StellarTxnContext | never> {
@@ -44,10 +45,8 @@ export class Vesting extends StellarContract<VestingParams> {
 		const inUtxo = (await sponsor.utxos)[0];
 		const inUtxoFee = (await sponsor.utxos)[1];
 
-		// TODO: parametrize, 
-		// reqt: can access an arbitrary Value 
-		// reqt: can find the Value in sponsor utxos
 		const lockedVal = inUtxo.value; 
+		expect(lockedVal).toBe();
 		
 		const validatorAddress = Address.fromValidatorHash(this.compiledContract.validatorHash)
 
