@@ -2,6 +2,7 @@ import { Address, Datum, TxOutput, Value} from "@hyperionbt/helios";
 import { StellarContract, redeem, datum, txn } from "../lib/StellarContract.js";
 import contract from "./Vesting.hl";
 import { StellarTxnContext } from "../lib/StellarTxnContext";
+import {expect} from "vitest";
 
 import {ADA} from "../lib/StellarTestHelper";
 
@@ -45,11 +46,12 @@ export class Vesting extends StellarContract<VestingParams> {
 		const inUtxo = (await sponsor.utxos)[0];
 		const inUtxoFee = (await sponsor.utxos)[1];
 
-		const lockedVal = inUtxo.value; 
-		expect(lockedVal).toBe();
+		const lockedVal = inUtxo.value; // Value
 		
+		// need to research contract parametrization
 		const validatorAddress = Address.fromValidatorHash(this.compiledContract.validatorHash)
 
+		// should be unique for each UTxO:
 		const inlineDatum = this.mkDatum({
 			sponsor: sponsor.address.pubKeyHash,
 			payee: payee.pubKeyHash,
@@ -58,6 +60,7 @@ export class Vesting extends StellarContract<VestingParams> {
 
 		tcx.addInput(inUtxo)
 		   .addInput(inUtxoFee)
+		   // has to be one of this for each maturation option
 		   .addOutput(new TxOutput(validatorAddress, lockedVal, inlineDatum))
                    .addOutput(
                     new TxOutput(
