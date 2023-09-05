@@ -263,4 +263,17 @@ describe("Vesting service", async () => {
 
 		});
 	});
+	describe("gradual maturation", () => {
+	        it("mkTxnDepo can process a list of inputs", async (context: localTC) => {
+			const {h, h: { network, actors, delay, state }} = context;
+			const { sasha, tom, pavel }  = actors;
+
+			const firstDeadline = BigInt(Date.now() + 500)
+			let testInput: [number, number][] = [[firstDeadline,0.5],[2n,0.5]]
+
+			expect(testInput).toBeTypeOf('object');
+			expect(testInput).toBe();
+
+		});
+	});
 });

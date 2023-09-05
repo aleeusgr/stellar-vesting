@@ -148,6 +148,19 @@ export class Vesting extends StellarContract<VestingParams> {
 			"mkTxnCancel",
 		],
             },
+            foo: {
+		// Principle: Code should make sense to a reader
+                purpose: "mkTxnDepo can process a list of inputs",
+                details: [
+                // descriptive details of the requirement (not the tech):
+		],
+                mech: [
+                // descriptive details of the chosen mechanisms for implementing the reqts:
+		],
+                requires: [
+		// The vision for 'requires' is that it should link to another top-level reqts key.
+		],
+            },
             mkTxnCancel: {
                 purpose: "can cancel vesting",
                 details: [
