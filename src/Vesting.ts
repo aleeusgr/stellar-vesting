@@ -129,12 +129,11 @@ export class Vesting extends StellarContract<VestingParams> {
     }
     requirements() {
         return {
-            "can deposit with gradual maturation": {
+            mkTxnDepoGM: {
 		// Principle: Code should make sense to a reader
-                purpose: "",
+                purpose: "allows (pavel | sasha) to initiate partial withdrawals",
                 details: [
                 // descriptive details of the requirement (not the tech):
-			// 
 		],
                 mech: [
                 // descriptive details of the chosen mechanisms for implementing the reqts:
@@ -143,10 +142,10 @@ export class Vesting extends StellarContract<VestingParams> {
 		],
                 requires: [
 		// The vision for 'requires' is that it should link to another top-level reqts key.
-			"can claim as payee",
-			"Tx Rejected as payee",
-			"can retrieve as sponsor",
-			"Tx Rejected as sponsor",
+			"Sasha can deposit to multiple utxos",
+			"can process a list of inputs",
+			"mkTxnClaim",
+			"mkTxnCancel",
 		],
             },
             mkTxnCancel: {
@@ -161,7 +160,6 @@ export class Vesting extends StellarContract<VestingParams> {
 			"can find the correct utxo",
 			"can serialize the Redeemer",
 			"can access currentSlot",
-			"can consume UTxO[]",
 		],
             },
             mkTxnClaim: {
@@ -176,7 +174,6 @@ export class Vesting extends StellarContract<VestingParams> {
 			"can find the correct utxo",
 			"can serialize the Redeemer",
 			"can access currentSlot",
-			"mkTxnClaim can consume UTxO[]",
 		],
             },
             mkDatum: {
