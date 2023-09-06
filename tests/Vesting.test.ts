@@ -269,17 +269,13 @@ describe("Vesting service", async () => {
 			const { sasha, tom, pavel }  = actors;
 			const sashaPuts = await sasha.utxos
 			expect(sashaPuts.length).toBe(2);
-			expect(sashaPuts[0].value.lovelace).toBe();
 			
-			// const valueA = 
-			// const valueB =  
+			const valueFst = new Value(sashaPuts[0].value.lovelace / 2n)
+			const valueSnd = new Value(sashaPuts[0].value.lovelace / 2n)
 
-			// sasha can input a list of pairs of vesting periods and Value 
-			const firstDeadline = BigInt(Date.now() + 500)
-			let testInput: [number, number][] = [[firstDeadline, valueA],[2n,valueB]]
-
-			//expect(testInput).toBeTypeOf('object');
-			
+			const deadlineFst = BigInt(Date.now() + 500)
+			let testInput: [number, number][] = [[deadlineFst, valueFst],[deadlineFst + 1000n, valueSnd]]
+			expect(testInput).toBeTypeOf('object');
 
 		});
 	});
