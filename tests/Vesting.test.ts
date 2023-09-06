@@ -267,8 +267,9 @@ describe("Vesting service", async () => {
 	        it("mkTxnDepo can process a list of inputs", async (context: localTC) => {
 			const {h, h: { network, actors, delay, state }} = context;
 			const { sasha, tom, pavel }  = actors;
-
-			expect((await sasha.utxos).length).toBe(2);
+			const sashaPuts = await sasha.utxos
+			expect(sashaPuts.length).toBe(2);
+			expect(sashaPuts[0].value.lovelace).toBe();
 			
 			// const valueA = 
 			// const valueB =  
