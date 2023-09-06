@@ -288,6 +288,11 @@ describe("Vesting service", async () => {
 
 			const txId = await h.submitTx(tcx.tx, "force");
 
+			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
+			const valUtxos = await network.getUtxos(validatorAddress)
+
+			expect(valUtxos).toBe();
+
 		});
 	});
 });
