@@ -251,13 +251,13 @@ describe("Vesting service", async () => {
 			// amountVested + (inputUtxo.value - txFee)
 			expect((await pavel.utxos).length).toBe(2);
 
-			const tcxCancel = await v.mkTxnClaimVesting(
+			const tcxClaim = await v.mkTxnClaimVesting(
 				pavel, 
 				valUtxos[0],
 				validFrom
 			);
 
-			const txIdCancel = await h.submitTx(tcxCancel.tx, "force");
+			const txIdClaim = await h.submitTx(tcxClaim.tx, "force");
 
 			expect((await pavel.utxos).length).toBe(2);
 
