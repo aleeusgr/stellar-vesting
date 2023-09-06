@@ -270,8 +270,9 @@ describe("Vesting service", async () => {
 			const sashaPuts = await sasha.utxos
 			expect(sashaPuts.length).toBe(2);
 			
-			const valueFst = new Value(sashaPuts[0].value.lovelace / 2n)
-			const valueSnd = new Value(sashaPuts[0].value.lovelace / 2n)
+			const amtFst = 10n * ADA;
+			const valueFst = new Value(amtFst)
+			const valueSnd = new Value(sashaPuts[0].value.lovelace - amtFst)
 
 			const deadlineFst = BigInt(Date.now() + 500)
 
@@ -292,6 +293,7 @@ describe("Vesting service", async () => {
 			const valUtxos = await network.getUtxos(validatorAddress)
 
 			expect(valUtxos[0].value.lovelace).toBe(valueFst.lovelace);
+			expect(valUtxos[1].value.lovelace).toBe(valueSnd.lovelace);
 
 			for (var valUtxo of valUtxos) {
 
@@ -306,8 +308,10 @@ describe("Vesting service", async () => {
 
 				const txIdClaim = await h.submitTx(tcxClaim.tx, "force");
 
+				expect(await pavel.address.toCborHex()).toBe(tcxClaim.outputs[0].address.toCborHex())
 			};
 
+			expect((await pavel.utxos)[1].value.lovelace).toBe(valueSnd.lovelace);
 			expect((await pavel.utxos)[0].value.lovelace).toBe(valueFst.lovelace);
 		});
 	});
