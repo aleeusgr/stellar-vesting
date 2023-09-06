@@ -268,11 +268,17 @@ describe("Vesting service", async () => {
 			const {h, h: { network, actors, delay, state }} = context;
 			const { sasha, tom, pavel }  = actors;
 
-			const firstDeadline = BigInt(Date.now() + 500)
-			let testInput: [number, number][] = [[firstDeadline,0.5],[2n,0.5]]
+			expect((await sasha.utxos).length).toBe(2);
+			
+			// const valueA = 
+			// const valueB =  
 
-			expect(testInput).toBeTypeOf('object');
-			expect(testInput).toBe();
+			// sasha can input a list of pairs of vesting periods and Value 
+			const firstDeadline = BigInt(Date.now() + 500)
+			let testInput: [number, number][] = [[firstDeadline, valueA],[2n,valueB]]
+
+			//expect(testInput).toBeTypeOf('object');
+			
 
 		});
 	});
