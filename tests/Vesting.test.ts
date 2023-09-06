@@ -291,8 +291,25 @@ describe("Vesting service", async () => {
 			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
 			const valUtxos = await network.getUtxos(validatorAddress)
 
-			expect(valUtxos).toBe();
+			expect((await pavel.utxos)[0].value.lovelace).toBe(13000000n);
 
+			for (var valUtxo of valUtxos) {
+
+				const now = BigInt(Date.now())
+				const validFrom = h.liveSlotParams.timeToSlot(now);
+
+				const tcxClaim = await v.mkTxnClaimVesting(
+					pavel, 
+					valUtxo,
+					validFrom
+				);
+
+				const txIdClaim = await h.submitTx(tcxClaim.tx, "force");
+
+			};
+
+			expect((await pavel.utxos).length).toBe(2);
+			expect((await pavel.utxos)[0].value.lovelace).toBe(13000000n);
 		});
 	});
 });
