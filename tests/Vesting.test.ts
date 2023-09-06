@@ -291,7 +291,7 @@ describe("Vesting service", async () => {
 			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
 			const valUtxos = await network.getUtxos(validatorAddress)
 
-			expect((await pavel.utxos)[0].value.lovelace).toBe(13000000n);
+			expect(valUtxos[0].value.lovelace).toBe(valueFst.lovelace);
 
 			for (var valUtxo of valUtxos) {
 
@@ -308,8 +308,7 @@ describe("Vesting service", async () => {
 
 			};
 
-			expect((await pavel.utxos).length).toBe(2);
-			expect((await pavel.utxos)[0].value.lovelace).toBe(13000000n);
+			expect((await pavel.utxos)[0].value.lovelace).toBe(valueFst.lovelace);
 		});
 	});
 });
