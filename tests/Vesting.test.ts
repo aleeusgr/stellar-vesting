@@ -276,7 +276,10 @@ describe("Vesting service", async () => {
 
 			const deadlineFst = BigInt(Date.now() + 500)
 
-			let testInput: [number, number][] = [[deadlineFst, valueFst],[deadlineFst + 1000n, valueSnd]]
+			let testInput: [number, number][] = [
+				[deadlineFst, valueFst],
+				[deadlineFst + 1000n, valueSnd]];
+
 			expect(testInput).toBeTypeOf('object');
 
 			const v = new Vesting(context);
@@ -295,6 +298,7 @@ describe("Vesting service", async () => {
 			expect(valUtxos[0].value.lovelace).toBe(valueFst.lovelace);
 			expect(valUtxos[1].value.lovelace).toBe(valueSnd.lovelace);
 
+			// change to a function?
 			for (var valUtxo of valUtxos) {
 
 				const now = BigInt(Date.now())
@@ -311,6 +315,7 @@ describe("Vesting service", async () => {
 				expect(await pavel.address.toCborHex()).toBe(tcxClaim.outputs[0].address.toCborHex())
 			};
 
+			expect(await network.getUtxos(validatorAddress)).toBeTypeOf("object");
 			expect((await pavel.utxos)[1].value.lovelace).toBe(valueSnd.lovelace);
 			expect((await pavel.utxos)[0].value.lovelace).toBe(valueFst.lovelace);
 		});
