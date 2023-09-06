@@ -9,7 +9,7 @@ import {ADA} from "../lib/StellarTestHelper";
 export type VestingParams = {
     sponsor: WalletEmulator;
     payee: Address;
-    deadline: bigint;
+    testInput: any; 
 };
 
 export type VestingDatumArgs = {
@@ -35,6 +35,43 @@ export class Vesting extends StellarContract<VestingParams> {
             time
         );
         return Datum.inline(t._toUplcData());
+    }
+    @txn
+    async mkTxnDepoGM(
+        { sponsor, payee, testInput }: VestingParams,
+        tcx: StellarTxnContext = new StellarTxnContext()
+    ): Promise<StellarTxnContext | never> {
+		expect(testInput).toBe();
+	    	const margin = 5n * ADA; // a bug, wip
+		const inUtxo = (await sponsor.utxos)[0];
+		const inUtxoFee = (await sponsor.utxos)[1];
+
+		for (var txInput of testInput) {
+		    console.log(number);
+		}
+		const lockedVal = inUtxo.value; // Value
+		
+		// need to research contract parametrization
+		const validatorAddress = Address.fromValidatorHash(this.compiledContract.validatorHash)
+
+		// should be unique for each UTxO:
+		const inlineDatum = this.mkDatum({
+			sponsor: sponsor.address.pubKeyHash,
+			payee: payee.pubKeyHash,
+			time: deadline
+		});
+
+		tcx.addInput(inUtxo)
+		   .addInput(inUtxoFee)
+		   // has to be one of this for each maturation option
+		   .addOutput(new TxOutput(validatorAddress, lockedVal, inlineDatum))
+                   .addOutput(
+                    new TxOutput(
+                        sponsor.address,
+                        new Value(inUtxoFee.value.lovelace - margin)
+                    )
+                );
+	return tcx
     }
     @txn
     async mkTxnDepositValueForVesting(

@@ -274,6 +274,7 @@ describe("Vesting service", async () => {
 			const valueSnd = new Value(sashaPuts[0].value.lovelace / 2n)
 
 			const deadlineFst = BigInt(Date.now() + 500)
+
 			let testInput: [number, number][] = [[deadlineFst, valueFst],[deadlineFst + 1000n, valueSnd]]
 			expect(testInput).toBeTypeOf('object');
 
@@ -282,7 +283,7 @@ describe("Vesting service", async () => {
 			const tcx = await v.mkTxnDepoGM({
 				sponsor: sasha,
 				payee: pavel.address, // maybe pkh? 
-				deadline: BigInt(deadline)
+				testInput: testInput
 			});
 
 			const txId = await h.submitTx(tcx.tx, "force");
