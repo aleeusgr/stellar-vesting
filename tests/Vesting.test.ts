@@ -277,6 +277,16 @@ describe("Vesting service", async () => {
 			let testInput: [number, number][] = [[deadlineFst, valueFst],[deadlineFst + 1000n, valueSnd]]
 			expect(testInput).toBeTypeOf('object');
 
+			const v = new Vesting(context);
+
+			const tcx = await v.mkTxnDepoGM({
+				sponsor: sasha,
+				payee: pavel.address, // maybe pkh? 
+				deadline: BigInt(deadline)
+			});
+
+			const txId = await h.submitTx(tcx.tx, "force");
+
 		});
 	});
 });
