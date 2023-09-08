@@ -247,9 +247,6 @@ describe("Vesting service", async () => {
 
 			expect(validFrom).toBeTypeOf('bigint');
 
-			// TODO: make more definitive case here:
-			// sasha spent one utxo in the fees, so the new utxo must be 
-			// amountVested + (inputUtxo.value - txFee)
 			const pavelHad = await pavel.utxos;
 			expect(pavelHad.length).toBe(2);
 
@@ -263,6 +260,8 @@ describe("Vesting service", async () => {
 
 			const pavelHas = await pavel.utxos;
 			expect(pavelHas.length).toBe(2);
+
+			expect(pavelHas[0].value.lovelace).toBe(sashaSends.value.lovelace)
 
 		});
 	});
