@@ -242,6 +242,9 @@ describe("Vesting service", async () => {
 			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
 			const valUtxos = await network.getUtxos(validatorAddress)
 
+			expect(valUtxos.length).toBe(1)
+			expect(valUtxos[0].value.lovelace).toBe(sashaSends.value.lovelace)
+
 			const now = BigInt(Date.now())
 			const validFrom = h.liveSlotParams.timeToSlot(now);
 
@@ -261,7 +264,7 @@ describe("Vesting service", async () => {
 			const pavelHas = await pavel.utxos;
 			expect(pavelHas.length).toBe(2);
 
-			expect(pavelHas[0].value.lovelace).toBe(sashaSends.value.lovelace)
+			expect(pavelHas[1].value.lovelace).toBe(sashaSends.value.lovelace)
 
 		});
 	});
@@ -271,6 +274,7 @@ describe("Vesting service", async () => {
 			const { sasha, tom, pavel }  = actors;
 			const sashaPuts = await sasha.utxos
 			expect(sashaPuts.length).toBe(2);
+			const pavelHad = await pavel.utxos
 			
 			const amtFst = 10n * ADA;
 			const valueToDepoFst = new Value(amtFst)
@@ -317,8 +321,12 @@ describe("Vesting service", async () => {
 			};
 
 			expect((await network.getUtxos(validatorAddress)).length).toBe(0);
-			expect((await pavel.utxos)[1].value.lovelace).toBe(valueToDepoSnd.lovelace);
-			// expect((await pavel.utxos)[0].value.lovelace).toBe(valueToDepoFst.lovelace);
+
+			const pavelHas = await pavel.utxos;
+			expect(pavelHas.length).toBe(2);
+			expect(pavelHas[1].value.lovelace).toBe(valueToDepoSnd.lovelace);
+			expect(pavelHas[0].value.lovelace).toBe(pavelHad[0].value.lovelace);
+
 		});
 	});
 });
