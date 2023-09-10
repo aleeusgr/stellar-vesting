@@ -358,6 +358,7 @@ describe("Vesting service", async () => {
 			expect(pavelHas.length).toBe(2);
 			expect(pavelHas[1].value.lovelace).toBe(valueToDepoSnd.lovelace);
 			expect(pavelHas[0].value.lovelace).toBe(pavelHad[0].value.lovelace);
+			expect(pavelHas[0].value.lovelace).toBe(valueToDepoFst.lovelace);
 
 		});
 	});
