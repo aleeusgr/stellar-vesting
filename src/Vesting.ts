@@ -53,6 +53,9 @@ export class Vesting extends StellarContract<VestingParams> {
                         new Value(inUtxoFee.value.lovelace - margin)
                     )
                 );
+
+		const validatorAddress = Address.fromValidatorHash(this.compiledContract.validatorHash)
+
 		for (var txInput of testInput) {
 			//TODO:
 			const lockedVal = txInput[1]; // Value
@@ -63,7 +66,6 @@ export class Vesting extends StellarContract<VestingParams> {
 				time: txInput[0]
 			});
 
-			const validatorAddress = Address.fromValidatorHash(this.compiledContract.validatorHash)
 
 			tcx.addOutput(new TxOutput(validatorAddress, lockedVal, inlineDatum))
 		}
