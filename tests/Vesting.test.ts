@@ -219,16 +219,14 @@ describe("Vesting service", async () => {
 
 			const v = new Vesting(context);
 
-			// TODO: deadline calculation
 			const tDepo = Date.now();
 			expect(tDepo).toBeGreaterThan(1693459155930);
 			const offset =                0;
 			const deadline = BigInt(tDepo + offset);
-			// expect(deadline).toBeGreaterThan(1693459155930n);
 
 			const tcx = await v.mkTxnDepositValueForVesting({
 				sponsor: sasha,
-				payee: pavel.address, // maybe pkh? 
+				payee: pavel.address, 
 				deadline: BigInt(deadline)
 			});
 
@@ -274,6 +272,40 @@ describe("Vesting service", async () => {
 			const { sasha, tom, pavel }  = actors;
 			const sashaPuts = await sasha.utxos
 			expect(sashaPuts.length).toBe(2);
+
+			const amtFst = 10n * ADA;
+			const valueToDepoFst = new Value(amtFst)
+			const valueToDepoSnd = new Value(sashaPuts[0].value.lovelace - amtFst)
+
+			const deadlineFst = BigInt(Date.now() + 500)
+
+			let testInput: [number, number][] = [
+				[deadlineFst, valueToDepoFst],
+				[deadlineFst + 1000n, valueToDepoSnd]];
+
+			expect(testInput).toBeTypeOf('object');
+
+			const v = new Vesting(context);
+
+			const tcx = await v.mkTxnDepoGM({
+				sponsor: sasha,
+				payee: pavel.address,
+				testInput: testInput
+			});
+
+			const txId = await h.submitTx(tcx.tx, "force");
+
+			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
+			const valUtxos = await network.getUtxos(validatorAddress)
+
+			expect(valUtxos[0].value.lovelace).toBe(valueToDepoFst.lovelace);
+			expect(valUtxos[1].value.lovelace).toBe(valueToDepoSnd.lovelace);
+		});
+	        it("gm: pavel can claim", async (context: localTC) => {
+			const {h, h: { network, actors, delay, state }} = context;
+			const { sasha, tom, pavel }  = actors;
+			const sashaPuts = await sasha.utxos
+			expect(sashaPuts.length).toBe(2);
 			const pavelHad = await pavel.utxos
 			
 			const amtFst = 10n * ADA;
@@ -292,7 +324,7 @@ describe("Vesting service", async () => {
 
 			const tcx = await v.mkTxnDepoGM({
 				sponsor: sasha,
-				payee: pavel.address, // maybe pkh? 
+				payee: pavel.address,
 				testInput: testInput
 			});
 
