@@ -301,5 +301,64 @@ describe("Vesting service", async () => {
 			expect(valUtxos[0].value.lovelace).toBe(valueToDepoFst.lovelace);
 			expect(valUtxos[1].value.lovelace).toBe(valueToDepoSnd.lovelace);
 		});
+	        it("gm: pavel can claim", async (context: localTC) => {
+			const {h, h: { network, actors, delay, state }} = context;
+			const { sasha, tom, pavel }  = actors;
+			const sashaPuts = await sasha.utxos
+			expect(sashaPuts.length).toBe(2);
+			const pavelHad = await pavel.utxos
+
+			const amtFst = 10n * ADA;
+			const valueToDepoFst = new Value(amtFst)
+			const valueToDepoSnd = new Value(sashaPuts[0].value.lovelace - amtFst)
+
+			const deadlineFst = BigInt(Date.now() + 500)
+
+			let testInput: [number, number][] = [
+				[deadlineFst, valueToDepoFst],
+				[deadlineFst + 1000n, valueToDepoSnd]];
+
+			expect(testInput).toBeTypeOf('object');
+
+			const v = new Vesting(context);
+
+			const tcx = await v.mkTxnDepoGM({
+				sponsor: sasha,
+				payee: pavel.address,
+				testInput: testInput
+			});
+
+			const txId = await h.submitTx(tcx.tx, "force");
+
+			const validatorAddress = Address.fromValidatorHash(v.compiledContract.validatorHash)
+			const valUtxos = await network.getUtxos(validatorAddress)
+
+			expect(valUtxos[0].value.lovelace).toBe(valueToDepoFst.lovelace);
+			expect(valUtxos[1].value.lovelace).toBe(valueToDepoSnd.lovelace);
+
+			for (var valUtxo of valUtxos) {
+
+				const now = BigInt(Date.now())
+				const validFrom = h.liveSlotParams.timeToSlot(now);
+
+				const tcxClaim = await v.mkTxnClaimVesting(
+					pavel,
+					valUtxo,
+					validFrom
+				);
+
+				const txIdClaim = await h.submitTx(tcxClaim.tx, "force");
+
+				expect(await pavel.address.toCborHex()).toBe(tcxClaim.outputs[0].address.toCborHex())
+			};
+
+			expect((await network.getUtxos(validatorAddress)).length).toBe(0);
+
+			const pavelHas = await pavel.utxos;
+			expect(pavelHas.length).toBe(2);
+			expect(pavelHas[1].value.lovelace).toBe(valueToDepoSnd.lovelace);
+			expect(pavelHas[0].value.lovelace).toBe(pavelHad[0].value.lovelace);
+
+		});
 	});
 });
