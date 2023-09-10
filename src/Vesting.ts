@@ -165,6 +165,21 @@ export class Vesting extends StellarContract<VestingParams> {
     }
     requirements() {
         return {
+            "can access timeToSlot in Vesting.ts": {
+		// Principle: Code should make sense to a reader
+                purpose: "reduce code bloat",
+                details: [
+			// when I create a transaction validy interval is one of inputs
+			// user should have no control of the vality interval, therefore 
+			// processing time should be abstracted.
+		],
+                mech: [
+                // descriptive details of the chosen mechanisms for implementing the reqts:
+		],
+                requires: [
+		// The vision for 'requires' is that it should link to another top-level reqts key.
+		],
+            },
             mkTxnDepoGM: {
 		// Principle: Code should make sense to a reader
                 purpose: "allows (pavel | sasha) to initiate partial withdrawals",
@@ -184,7 +199,7 @@ export class Vesting extends StellarContract<VestingParams> {
 			"mkTxnCancel",
 		],
             },
-            foo: {
+            "can process a list": {
 		// Principle: Code should make sense to a reader
                 purpose: "mkTxnDepo can process a list of inputs",
                 details: [
