@@ -13,6 +13,9 @@ dependencies:
     version: 7.5.4
 
 devDependencies:
+  '@fast-check/vitest':
+    specifier: ^0.0.7
+    version: 0.0.7(vitest@0.34.1)
   '@rollup/plugin-node-resolve':
     specifier: ^15.1.0
     version: 15.1.0(rollup@3.23.1)
@@ -297,6 +300,15 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /@fast-check/vitest@0.0.7(vitest@0.34.1):
+    resolution: {integrity: sha512-mji37/s1TQDOLRsQJsep6c0It8O+pmKxzmoXe+jBdOMuI8dtiREizfJ4tuETnm7SSLPa3TLTzyCMdaQBa6xcgw==}
+    peerDependencies:
+      vitest: '>=0.28.1'
+    dependencies:
+      fast-check: 3.13.0
+      vitest: 0.34.1(@vitest/browser@0.34.1)(@vitest/ui@0.34.1)(webdriverio@8.10.7)
+    dev: true
 
   /@hyperionbt/helios@0.15.2:
     resolution: {integrity: sha512-CKWJkC7ArWcTl53Xg6ICO/cUti76nXpijGlyOfKKb33osd0QegQfxRvF5xyjyLizcrJcPxhWbjyTRMBKVYwUiw==}
@@ -1513,6 +1525,13 @@ packages:
       - supports-color
     dev: true
 
+  /fast-check@3.13.0:
+    resolution: {integrity: sha512-m6+3gZ/yTiCWTuV/1e/UuPPjyyyHdQ5gu0pMd84C6705VTDjAgAE6nqFT5jhgegFllCJ95yOzBpqvJSs2DZAxQ==}
+    engines: {node: '>=8.0.0'}
+    dependencies:
+      pure-rand: 6.0.3
+    dev: true
+
   /fast-deep-equal@2.0.1:
     resolution: {integrity: sha512-bCK/2Z4zLidyB4ReuIsvALH6w31YfAQDmXMqMx6FyfHqvBxtjC0eRumeSu4Bs3XtXwpyIywtSTrVT99BxY1f9w==}
     dev: true
@@ -2469,6 +2488,10 @@ packages:
       - encoding
       - supports-color
       - utf-8-validate
+    dev: true
+
+  /pure-rand@6.0.3:
+    resolution: {integrity: sha512-KddyFewCsO0j3+np81IQ+SweXLDnDQTs5s67BOnrYmYe/yNmUhttQyGsYzy8yUnoljGAQ9sl38YB4vH8ur7Y+w==}
     dev: true
 
   /query-selector-shadow-dom@1.0.1:
