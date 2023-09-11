@@ -94,6 +94,9 @@ describe("Vesting service", async () => {
 			const {h, h: { network, actors, delay, state }} = context;
 
 			const rng = new FuzzyTest();
+			const res = rng.newRand();
+
+			expect(res()).toBeTypeOf('number');
 
 		});
 		it("can access validator UTXO", async (context: localTC) => {
