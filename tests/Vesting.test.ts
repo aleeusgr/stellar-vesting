@@ -99,7 +99,7 @@ describe("Vesting service", async () => {
 			expect(res()).toBeTypeOf('number');
 
 		});
-		it("can use FuzzyTest.test", async (context: localTC) => {
+		it.todo("can automate sending transactions?", async (context: localTC) => {
 			const {h, h: { network, actors, delay, state }} = context;
 
 			const rng = new FuzzyTest();
