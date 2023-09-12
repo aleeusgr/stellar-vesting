@@ -99,6 +99,17 @@ describe("Vesting service", async () => {
 			expect(res()).toBeTypeOf('number');
 
 		});
+		it("can use FuzzyTest.test", async (context: localTC) => {
+			const {h, h: { network, actors, delay, state }} = context;
+
+			const rng = new FuzzyTest();
+
+			// https://www.hyperion-bt.org/helios-book/api/reference/classes/FuzzyTest.html?highlight=fuzzy#test
+			// maybe it's simpler to do the same with psm?
+			const result = await rng.test();
+
+
+		});
 		it("can access validator UTXO", async (context: localTC) => {
 		    const {h, h: { network, actors, delay, state }} = context;
 			const { sasha, tom, pavel } = actors;
