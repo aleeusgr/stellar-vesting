@@ -37,6 +37,8 @@ import {
     Vesting,
 } from "../src/Vesting";
 
+import { test, fc } from '@fast-check/vitest';
+
 const it = itWithContext<localTC>;
 const describe = descrWithContext<localTC>;
 const fit = it.only
@@ -89,26 +91,6 @@ describe("Vesting service", async () => {
 			expect(typeof(h.slotToTimestamp(h.currentSlot()))).toBe('object');
 			expect(h.liveSlotParams.timeToSlot(2n)).toBe(0n);
 			expect(h.liveSlotParams.timeToSlot(1000n)).toBe(1n);
-		});
-		it("can access FuzzyTest", async (context: localTC) => {
-			const {h, h: { network, actors, delay, state }} = context;
-
-			const rng = new FuzzyTest();
-			const res = rng.newRand();
-
-			expect(res()).toBeTypeOf('number');
-
-		});
-		it.todo("can automate sending transactions?", async (context: localTC) => {
-			const {h, h: { network, actors, delay, state }} = context;
-
-			const rng = new FuzzyTest();
-
-			// https://www.hyperion-bt.org/helios-book/api/reference/classes/FuzzyTest.html?highlight=fuzzy#test
-			// maybe it's simpler to do the same with psm?
-			const result = await rng.test();
-
-
 		});
 		it("can access validator UTXO", async (context: localTC) => {
 		    const {h, h: { network, actors, delay, state }} = context;
@@ -282,6 +264,39 @@ describe("Vesting service", async () => {
 			const txIdCancel = await h.submitTx(tcxCancel.tx, "force");
 
 			expect((await pavel.utxos).length).toBe(2);
+
+		});
+	});
+	describe("Property testing", () => {
+
+		it("can access fast-check", async (context: localTC) => {
+			const {h, h: { network, actors, delay, state }} = context;
+
+			// for all a, b, c strings
+			// b is a substring of a + b + c
+			test.prop([fc.string(), fc.string(), fc.string()])('should detect the substring', (a, b, c) => {
+				return (a + b + c).includes(b);
+			});
+
+		});
+		it("can access FuzzyTest", async (context: localTC) => {
+			const {h, h: { network, actors, delay, state }} = context;
+
+			const rng = new FuzzyTest();
+			const res = rng.newRand();
+
+			expect(res()).toBeTypeOf('number');
+
+		});
+		it.todo("can automate sending transactions?", async (context: localTC) => {
+			const {h, h: { network, actors, delay, state }} = context;
+
+			const rng = new FuzzyTest();
+
+			// https://www.hyperion-bt.org/helios-book/api/reference/classes/FuzzyTest.html?highlight=fuzzy#test
+			// maybe it's simpler to do the same with psm?
+			const result = await rng.test();
+
 
 		});
 	});
