@@ -55,6 +55,29 @@ class VestingTestHelper extends StellarCapoTestHelper<SampleTreasury> {
 
 type localTC = StellarTestContext<SampleTreasuryTestHelper>;
 
+async function splitUtxos(user: WalletEmulator ) {
+	// duplicated
+	const margin = 45n * ADA;
+	const firstUtxo = (await user.utxos)[0]
+	const secondUtxo = (await user.utxos)[1]
+	const tx = new Tx();
+
+	tx.addInput(firstUtxo);
+	tx.addInput(secondUtxo);
+
+	tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
+	tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
+	tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
+	tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
+	tx.addOutput(
+	    new TxOutput(
+		user.address,
+		new Value(firstUtxo.value.lovelace - margin)
+	    )
+	);
+	return tx
+}
+
 describe("Vesting service", async () => {
     beforeEach<localTC>(async (context) => {
         await addTestContext(context, VestingTestHelper); //, VHelpers);
@@ -114,30 +137,7 @@ describe("Vesting service", async () => {
 		    const {h, h: { network, actors, delay, state }} = context;
 			const { sasha, tom, pavel } = actors;
 
-			async function splitUtxos(user: WalletEmulator ) {
-				// duplicated
-				const margin = 45n * ADA;
-				const firstUtxo = (await user.utxos)[0]
-				const secondUtxo = (await user.utxos)[1]
-				const tx = new Tx();
-
-				tx.addInput(firstUtxo);
-				tx.addInput(secondUtxo);
-
-				tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
-				tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
-				tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
-				tx.addOutput(new TxOutput(user.address, new Value(10n * ADA)));
-				tx.addOutput(
-				    new TxOutput(
-					user.address,
-					new Value(firstUtxo.value.lovelace - margin)
-				    )
-				);
-				return h.submitTx(tx, "force"); // h. prevents abstracting
-            		}
-
-			const splitUtxo = await splitUtxos(sasha);
+			const splitUtxo = await h.submitTx(splitUtxos(sasha));
 
 			expect((await sasha.utxos).length).toBeGreaterThan(2);
 
