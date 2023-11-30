@@ -103,7 +103,7 @@ describe("Vesting service", async () => {
 
 			// calculate the deadline:
 			const timeAtDepo = Date.now();
-			const offset =             60*1000;
+			const offset =             17*60*1000;
 			const deadline = BigInt(timeAtDepo + offset);
 
 			const tcx = await v.mkTxnDepositValueForVesting({
