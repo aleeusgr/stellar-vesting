@@ -13,20 +13,22 @@ enum Redeemer {
 
 func main(datum: Datum, redeemer: Redeemer, context: ScriptContext) -> Bool {
     tx: Tx = context.tx;
-    now: Time = tx.time_range.start;
-    print("current_time_is:");
-    print(now.show());
+    // now: Time = tx.time_range.start;
+    // print("current_time_is:");
+    // print(now.show());
     redeemer.switch {
         Cancel => {
             // Check if deadline hasn't passed
-            (now < datum.deadline).trace("VS1: ") && 
+	    // (now < datum.deadline).trace("VS1: ") && 
+	    tx.time_range.is_before(datum.deadline) &&
 
             // Check that the owner signed the transaction
             tx.is_signed_by(datum.sponsor).trace("VS2: ")
         },
         Claim => {
            // Check if deadline has passed.
-           (now > datum.deadline).trace("VS3: ") &&
+           // (now > datum.deadline).trace("VS3: ") &&
+	   tx.time_range.is_after(datum.deadline) &&
 
            // Check that the beneficiary signed the transaction.
            tx.is_signed_by(datum.payee).trace("VS4: ")
